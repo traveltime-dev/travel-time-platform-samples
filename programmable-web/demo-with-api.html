@@ -8,6 +8,7 @@
       font-size: 2em;
       left: -0.5em;
       top: -1.5em;
+      position: absolute;
     }
     .red { color: red; }
     .blue { color: blue; }
@@ -74,7 +75,6 @@
           var icon = L.divIcon({
             className: "glyphicon glyphicon-map-marker map-marker " + color
           });
-
           L.marker(i.coords, {icon: icon}).addTo(map);
         }
       }
