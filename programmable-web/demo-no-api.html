@@ -1,75 +1,75 @@
 <html>
-	<head>
-	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-	<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
-	<style type="text/css">
-		.map-marker {
-			font-size: 2em;
-			left: -0.5em;
-			top: -1.5em;
-		}
-		.red { color: red; }
-		.blue { color: blue; }
-		.yellow { color: yellow; }
-	</style>
-	</head>
-	<body>
-		<div id="map" style="height: 600px;"></div>
-		<script type="text/javascript" >
-			var origin = [51.504622, -0.089905]; // This is the Location of starting point which is London School of Commerce
-			var radiusMeters = 3 * 1609.34; // miles * meters per mile.
+  <head>
+  <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+  <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+  <style type="text/css">
+    .map-marker {
+      font-size: 2em;
+      left: -0.5em;
+      top: -1.5em;
+    }
+    .red { color: red; }
+    .blue { color: blue; }
+    .yellow { color: yellow; }
+  </style>
+  </head>
+  <body>
+    <div id="map" style="height: 600px;"></div>
+    <script type="text/javascript" >
+      var origin = [51.504622, -0.089905]; // This is the Location of starting point which is London School of Commerce
+      var radiusMeters = 3 * 1609.34; // miles * meters per mile.
 
-			var osmUrl="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"; // This the OSM public tile layer for the map url template.
-			var osmTileLayer = L.tileLayer(osmUrl, {minZoom: 8, maxZoom: 12});
+      var osmUrl="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"; // This the OSM public tile layer for the map url template.
+      var osmTileLayer = L.tileLayer(osmUrl, {minZoom: 8, maxZoom: 12});
 
-			// we use the starting coordinates to center the map.
-			var map = L.map("map").addLayer(osmTileLayer).setView(origin, 12);
+      // we use the starting coordinates to center the map.
+      var map = L.map("map").addLayer(osmTileLayer).setView(origin, 12);
 
-			// These are the points of interest that we are going to filter and get travel time for.
-			var poi = [
-				{coords: [51.501988, -0.018267], name: "POI0" },
-				{coords: [51.505000, -0.100000], name: "POI1" },
-				{coords: [51.510000, -0.160000], name: "POI2" },
-				{coords: [51.525276, -0.033919], name: "POI3" },
-				{coords: [51.523860, -0.065301], name: "POI4" },
-				{coords: [51.449830, -0.045265], name: "POI5" },
-				{coords: [51.462951, -0.135480], name: "POI6" },
-				{coords: [51.518080, -0.127841], name: "POI7" },
-				{coords: [51.489754, -0.119242], name: "POI8" },
-				//This is a point that is 5 miles away from origin
-				{coords: [51.489754, -0.150000], name: "POI9" }
-			];
+      // These are the points of interest that we are going to filter and get travel time for.
+      var poi = [
+        {coords: [51.501988, -0.018267], name: "POI0" },
+        {coords: [51.505000, -0.100000], name: "POI1" },
+        {coords: [51.510000, -0.160000], name: "POI2" },
+        {coords: [51.525276, -0.033919], name: "POI3" },
+        {coords: [51.523860, -0.065301], name: "POI4" },
+        {coords: [51.449830, -0.045265], name: "POI5" },
+        {coords: [51.462951, -0.135480], name: "POI6" },
+        {coords: [51.518080, -0.127841], name: "POI7" },
+        {coords: [51.489754, -0.119242], name: "POI8" },
+        //This is a point that is 5 miles away from origin
+        {coords: [51.489754, -0.150000], name: "POI9" }
+      ];
 
 
 
-			function distanceFromOrigin(point) {
-				return L.latLng(origin).distanceTo(point.coords)
-			}
+      function distanceFromOrigin(point) {
+        return L.latLng(origin).distanceTo(point.coords)
+      }
 
-			var poiInsideCircle = poi.filter(function(element){
-				return distanceFromOrigin(element) < radiusMeters;
-			});
+      var poiInsideCircle = poi.filter(function(element){
+        return distanceFromOrigin(element) < radiusMeters;
+      });
 
-			var poiOutsideCircle = poi.filter(function(element){
-				return distanceFromOrigin(element) >= radiusMeters;
-			})
+      var poiOutsideCircle = poi.filter(function(element){
+        return distanceFromOrigin(element) >= radiusMeters;
+      })
 
-			function drawMarker(color) {
-				return function (i) {
-					var icon = L.divIcon({
-						className: "glyphicon glyphicon-map-marker map-marker " + color
-					});
+      function drawMarker(color) {
+        return function (i) {
+          var icon = L.divIcon({
+            className: "glyphicon glyphicon-map-marker map-marker " + color
+          });
 
-					L.marker(i.coords, {icon: icon}).addTo(map);
-				}
-			}
+          L.marker(i.coords, {icon: icon}).addTo(map);
+        }
+      }
 
-			L.circle(origin, radiusMeters).addTo(map);
+      L.circle(origin, radiusMeters).addTo(map);
 
-			poiInsideCircle.forEach(drawMarker("blue"));
-			poiOutsideCircle.forEach(drawMarker("red"));
+      poiInsideCircle.forEach(drawMarker("blue"));
+      poiOutsideCircle.forEach(drawMarker("red"));
 
-		</script>
-	</body>
+    </script>
+  </body>
 </html>
