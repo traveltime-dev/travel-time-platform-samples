@@ -85,10 +85,13 @@
 
       function getPointsInResponse(poi, responseText) {
         var responseJson = JSON.parse(responseText);
-        var poiWithTime = poi.filter(function (element, index) {
-          return typeof responseJson.destinations.destination1.points[index.toString()] !== "undefined";
-        })
-        return poiWithTime;
+        // as a response we get dictionary with reachable.
+        // in request we have set it up as "id": coords, so keys of the dictionary are indices of the reachable points.
+        var reachablePoints = Object.keys(responseJson.destinations.destination1.points);
+
+        return reachablePoints.map(function(i){
+          return poi[i];
+        });
       }
 
       function showResponse(response, poi, origin, radiusMeters, map) {
