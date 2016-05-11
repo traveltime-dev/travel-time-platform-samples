@@ -1,0 +1,4 @@
+define({
+	apiId: "",
+	apiKey: ""
+})
