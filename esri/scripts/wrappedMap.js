@@ -7,6 +7,7 @@ define(["esri/Map",
 		"esri/geometry/Point",
 		"esri/symbols/SimpleMarkerSymbol",
 	 	"esri/Graphic",
+	 	"esri/geometry/geometryEngine",
 	 	"scripts/api"],
 	function(Map,
 			MapView,
@@ -17,6 +18,7 @@ define(["esri/Map",
 			Point,
 			SimpleMarkerSymbol,
 			Graphic,
+			geometryEngine,
 			api){
 
 		return function(startingPosition, div){
@@ -52,16 +54,6 @@ define(["esri/Map",
 				});
 			}
 
-			self.shapes = []
-			self.removeShapes = function(){
-				self.view.then(function() {
-					self.shapes.forEach(function(f){
-						self.view.graphics.remove(f);
-					});
-					self.shapes = []
-				});
-			}
-
 			self.points = [];
 			self.drawPerson = function(location){
 				 var markerSymbol = new SimpleMarkerSymbol({
@@ -94,9 +86,20 @@ define(["esri/Map",
 				});
 			}
 
-			self.drawShape = function(response){
+			self.shapes = []
+			self.removeShapes = function(){
+				self.view.then(function() {
+					self.shapes.forEach(function(f){
+						self.view.graphics.remove(f);
+					});
+					self.shapes = []
+				});
+			}
+
+			self.drawShape = function(response, color){
+				color = typeof color !== 'undefined' ? color : [227, 139, 79, 0.5];
 				var polygonSymbol = new SimpleFillSymbol({
-					color: [227, 139, 79, 0.5],
+					color: color,
 					outline: {
 						color: [255, 255, 255],
 						width: 1
@@ -116,7 +119,6 @@ define(["esri/Map",
 				self.view.then(function(){
 					self.view.graphics.addMany(shapes);
 				})
-
 				self.shapes = self.shapes.concat(shapes);
 			}
 		}

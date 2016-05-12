@@ -23,8 +23,6 @@ define(["scripts/keys",
 		all([
 			api.getPath(batman[0], batman[1]),
 			api.getPath(superman[0], superman[1]),
-			api.getShape(batman[0]),
-			api.getShape(superman[0])
 		]).then(function(results){
 			var batmanPath = results[0];
 			var supermanPath = results[1];
@@ -44,13 +42,15 @@ define(["scripts/keys",
 				}
 				var nextBatmanPosition = batmanPath[Math.min(batmanPath.length - 1, Math.round(batmanStep * i))];
 				var nextSupermanPosition = supermanPath[Math.min(supermanPath.length - 1, Math.round(supermanStep * i))];
-					all([
-					api.getShape(nextBatmanPosition),
-					api.getShape(nextSupermanPosition)
-				]).then(function(results){
+				
+				api
+				.getShape(nextBatmanPosition, nextSupermanPosition)
+				.then(function(results){
 					map.removeShapes();
-					map.drawShape(results[0]);
-					map.drawShape(results[1]);
+					map.drawShape(results.first);
+					map.drawShape(results.second);
+
+					map.drawShape(results.intersection, [50, 144, 128, 0.5]);
 
 					map.removePersons();
 					map.drawPerson(nextBatmanPosition);
