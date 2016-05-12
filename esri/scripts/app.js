@@ -1,12 +1,20 @@
 define(["scripts/keys",
 	 	"scripts/api",
 	 	"scripts/wrappedMap",
+	 	"esri/geometry/Polygon",
+	 	"esri/geometry/Point",
+	 	"esri/geometry/geometryEngine",
 	 	"dojo/promise/all",
+	 	"scripts/caffeList",
 	 	"dojo/domReady!"],
 	function(keys,
 			api,
 			WrappedMap,
-			all
+			Polygon,
+			Point,
+			geometryEngine,
+			all,
+			caffeList
 			) {
 
 		if(keys.apiId == ""){
@@ -55,6 +63,29 @@ define(["scripts/keys",
 					map.removePersons();
 					map.drawPerson(nextBatmanPosition);
 					map.drawPerson(nextSupermanPosition);
+
+
+					var meetingLocations = results.intersection.map(function(shape){
+						var rings = shape.shell.map(api.swapCoords);
+						if(rings.length > 0)
+							return new Polygon({rings: rings});
+						else 
+							return null;
+					});
+
+					caffeList.forEach(function(f){
+						var location = meetingLocations.find(function(region) {
+							if(region){
+								return geometryEngine.within(new Point(f), region);
+							} else {
+								return false;
+							}
+						});
+
+						if(location) {						
+							map.drawPerson([f.latitude, f.longitude]);
+						}
+					});
 				})
 			}, 20 * 1000 / steps);
 		});
