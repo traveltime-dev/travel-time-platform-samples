@@ -4,6 +4,8 @@ define(["esri/Map",
 	 	"esri/symbols/SimpleLineSymbol",
 	 	"esri/geometry/Polygon",
 	 	"esri/symbols/SimpleFillSymbol",
+		"esri/geometry/Point",
+		"esri/symbols/SimpleMarkerSymbol",
 	 	"esri/Graphic",
 	 	"scripts/api"],
 	function(Map,
@@ -12,6 +14,8 @@ define(["esri/Map",
 			SimpleLineSymbol,
 			Polygon,
 			SimpleFillSymbol,
+			Point,
+			SimpleMarkerSymbol,
 			Graphic,
 			api){
 
@@ -29,29 +33,64 @@ define(["esri/Map",
 				zoom: 12
 			});
 
-			self.drawPath = function(response){
+			self.drawPath = function(path){
 				var lineSymbol = new SimpleLineSymbol({
 					color: [226, 119, 40],
 					width: 1
 				});
 
-				var lines = response.parts.map(function(segment){
-					path = segment.coords.map(api.swapCoords);
 
-					return new Graphic({
-						geometry: new Polyline({paths: path}),
-						symbol: lineSymbol
-					});
+				var graphics = new Graphic({
+					geometry: new Polyline({
+						paths: path.map(api.swapCoords)
+					}),
+					symbol: lineSymbol
 				});
 
 				self.view.then(function(){
-					self.view.graphics.addMany(lines);
+					self.view.graphics.add(graphics);
 				});
 			}
 
-			self.removeShapes = function(shapes){
-				shapes.forEach(function(f){
-					self.view.graphics.remove(f);
+			self.shapes = []
+			self.removeShapes = function(){
+				self.view.then(function() {
+					self.shapes.forEach(function(f){
+						self.view.graphics.remove(f);
+					});
+					self.shapes = []
+				});
+			}
+
+			self.points = [];
+			self.drawPerson = function(location){
+				 var markerSymbol = new SimpleMarkerSymbol({
+					color: [226, 119, 40],
+					outline: { 
+						color: [255, 255, 255],
+						width: 2
+					}
+				});
+
+				var point = new Point(api.swapCoords(location));
+			 	var graphic = new Graphic({
+					geometry: point,
+					symbol: markerSymbol
+				});	
+
+				self.view.then(function(){
+					self.view.graphics.add(graphic);
+				});
+				self.points.push(graphic);
+			}
+
+			self.removePersons = function(){
+				self.view.then(function(){
+					self.points.forEach(function(f){
+						self.view.graphics.remove(f);
+					});
+				
+					self.points = [];
 				});
 			}
 
@@ -66,7 +105,7 @@ define(["esri/Map",
 
 				var shapes = response.map(function(shape){
 					var rings = shape.shell.map(api.swapCoords);
-					var polygon =  new Polygon({rings: rings});
+					var polygon =	new Polygon({rings: rings});
 
 					return new Graphic({
 						geometry: polygon,
@@ -78,7 +117,7 @@ define(["esri/Map",
 					self.view.graphics.addMany(shapes);
 				})
 
-				return shapes;
+				self.shapes = self.shapes.concat(shapes);
 			}
 		}
 })
