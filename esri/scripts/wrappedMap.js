@@ -8,6 +8,7 @@ define(["esri/Map",
 		"esri/symbols/SimpleMarkerSymbol",
 	 	"esri/Graphic",
 	 	"esri/geometry/geometryEngine",
+	 	"esri/widgets/Popup",
 	 	"scripts/api"],
 	function(Map,
 			MapView,
@@ -19,6 +20,7 @@ define(["esri/Map",
 			SimpleMarkerSymbol,
 			Graphic,
 			geometryEngine,
+			Popup,
 			api){
 
 		return function(startingPosition, div){
@@ -34,6 +36,25 @@ define(["esri/Map",
 				map: self.map,
 				zoom: 12
 			});
+		
+			self.view.on("click", function(evt) {
+			    var closest = self.meetupLocations.reduce(function(a, b) {
+			    	console.log(evt.mapPoint.distance(a), evt.mapPoint.distance(b))
+			    	if(evt.mapPoint.distance(a) < evt.mapPoint.distance(b)) {
+			    		return a;
+			    	} else {
+			    		return b;
+			    	}
+			    }, NaN);
+			    if(closest) {
+				    evt.mapPoint.latitude = closest.latitude;
+				    evt.mapPoint.longitude = closest.longitude; 
+				    self.view.popup.open({
+				        title: "Lets meet here",
+				        location: evt.mapPoint.clone() // Set the location of the popup to the clicked location
+				    });
+				}
+			}); 
 
 			self.drawPath = function(path){
 				var lineSymbol = new SimpleLineSymbol({
@@ -120,6 +141,36 @@ define(["esri/Map",
 					self.view.graphics.addMany(shapes);
 				})
 				self.shapes = self.shapes.concat(shapes);
+			}
+
+			self.meetupLocations = []
+			self.drawMeetupLocation = function(location){
+				var onTheMap = self.meetupLocations.find(function(c){
+				 return c[0] == location[0] && c[1] == location[1];
+				});
+				if(!onTheMap) {
+					var markerSymbol = new SimpleMarkerSymbol({
+						color: [50, 144, 128],
+						outline: { 
+							color: [255, 255, 255],
+							width: 2
+						}
+					});
+
+					var point = new Point(api.swapCoords(location));
+				 	var graphic = new Graphic({
+						geometry: point,
+						symbol: markerSymbol
+					});
+
+					self.view.then(function(){
+						self.view.graphics.add(graphic);
+					});
+
+					self.meetupLocations.push(point);
+
+					
+				}
 			}
 		}
 })

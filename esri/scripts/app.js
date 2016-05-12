@@ -37,7 +37,7 @@ define(["scripts/keys",
 
 			map.drawPath(batmanPath);
 			map.drawPath(supermanPath);
-			var steps = 20;
+			var steps = 7;
 			var batmanStep = batmanPath.length / steps;
 			var supermanStep = supermanPath.length / steps;
 			var i = 1;	
@@ -82,12 +82,12 @@ define(["scripts/keys",
 							}
 						});
 
-						if(location) {						
-							map.drawPerson([f.latitude, f.longitude]);
+						if(location) {
+							map.drawMeetupLocation([f.latitude, f.longitude]);
 						}
 					});
 				})
-			}, 20 * 1000 / steps);
+			}, 7 * 1000 / steps);
 		});
 
 	}
