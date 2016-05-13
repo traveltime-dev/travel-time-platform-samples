@@ -60,10 +60,16 @@ define(["esri/Map",
 				if(closest && 0.0016 > distance(evt.mapPoint, closest.location)) {
 					evt.mapPoint.latitude = closest.location.latitude;
 					evt.mapPoint.longitude = closest.location.longitude; 
+					self.view.popup.dockEnabled = false;
 					self.view.popup.open({
 						title: "Lets meet at " + closest.location.name,
-						content: "It only " + asMinutes(closest.firstDuration) + "  minutes from me and " + asMinutes(closest.secondDuration) + "  minutes from you",	
+						content: "It is only " + asMinutes(closest.firstDuration) + "  minutes from me and " + asMinutes(closest.secondDuration) + "  minutes from you",	
 						location: evt.mapPoint.clone(),
+						dockEnabled: false,
+						dockOptions: {
+							breakpoint: false,
+							buttonEnabled: false
+						},
 						actions: [{
 							id: "get-route",
 							title: "Route us here",
@@ -76,7 +82,8 @@ define(["esri/Map",
 
 
 			self.view.popup.on("trigger-action", function(event){
-				self.view.popup.close();
+
+
 				var longestTrip = Math.max(self.selectedMarker.firstDuration,
 					self.selectedMarker.secondDuration);
 
@@ -87,7 +94,24 @@ define(["esri/Map",
 					self.selectedMarker.secondLocation,
 					[self.selectedMarker.location.latitude, self.selectedMarker.location.longitude],
 					arivalDate
-				).then(self.drawDirections);
+				).then(function(f){
+					self.view.popup.dockEnabled = true;
+					self.view.popup.actions = [];
+					function formatDirections(a, b){
+						if(b.directions) {
+							return a + "<li>" + b.directions + "</li>";
+						} else {
+							return a;
+						}
+					}
+
+					var instructions = f[0].reduce(formatDirections, "<h2>Directions for you</h2>");
+					var instructionsForFriend = f[1].reduce(formatDirections, "<h2>Directions for a friend</h2>");
+
+					self.view.popup.content = instructions + instructionsForFriend;
+
+					self.drawDirections(f);
+				});
 
 				
 			});
