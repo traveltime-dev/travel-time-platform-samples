@@ -23,8 +23,7 @@ define(["scripts/keys",
 
 		var map = new WrappedMap([-0.089, 51.5], "viewDiv");
 
-		var batman = [[51.52053285458183, -0.0487518310546875],
-			[51.52903776845088, -0.234832763671875]];
+		var batman = [[51.50903776845088, -0.164832763671875], [51.51053285458183, -0.0487518310546875]];
 
 		var superman = [[51.46898018751687, -0.1682281494140625], [51.48533822311959, 0.00274658203125]];
 
@@ -40,32 +39,32 @@ define(["scripts/keys",
 			var steps = 7;
 			var batmanStep = batmanPath.length / steps;
 			var supermanStep = supermanPath.length / steps;
-			var i = 1;	
-			var direction = -1;
+			var i = -1;	
+			var direction = 1;
 			
 			window.setInterval(function(){
 				i = i + direction;
-				if(i == 0 || i == steps) {
-					direction = - direction;
+				if(i > steps) {
+					return;
+					//direction = - direction;
 				}
 				var nextBatmanPosition = batmanPath[Math.min(batmanPath.length - 1, Math.round(batmanStep * i))];
 				var nextSupermanPosition = supermanPath[Math.min(supermanPath.length - 1, Math.round(supermanStep * i))];
-				
-				api
-				.getShape(nextBatmanPosition, nextSupermanPosition)
+				all([api.getShape(nextBatmanPosition, nextSupermanPosition),
+					api.timeFilter(nextBatmanPosition, nextSupermanPosition, caffeList)])
 				.then(function(results){
+					var shapeResult = results[0];
 					map.removeShapes();
-					map.drawShape(results.first);
-					map.drawShape(results.second);
+					map.drawShape(shapeResult.first);
+					map.drawShape(shapeResult.second);
 
-					map.drawShape(results.intersection, [50, 144, 128, 0.5]);
+					map.drawShape(shapeResult.intersection, [50, 144, 128, 0.5], "intersection");
 
 					map.removePersons();
 					map.drawPerson(nextBatmanPosition);
 					map.drawPerson(nextSupermanPosition);
 
-
-					var meetingLocations = results.intersection.map(function(shape){
+					var meetingLocations = shapeResult.intersection.map(function(shape){
 						var rings = shape.shell.map(api.swapCoords);
 						if(rings.length > 0)
 							return new Polygon({rings: rings});
@@ -73,17 +72,18 @@ define(["scripts/keys",
 							return null;
 					});
 
-					caffeList.forEach(function(f){
+					var filterResults = results[1];
+					filterResults.forEach(function(f){
 						var location = meetingLocations.find(function(region) {
 							if(region){
-								return geometryEngine.within(new Point(f), region);
+								return geometryEngine.within(new Point(f.location), region);
 							} else {
 								return false;
 							}
 						});
 
 						if(location) {
-							map.drawMeetupLocation([f.latitude, f.longitude]);
+							map.drawMeetupLocation(f);
 						}
 					});
 				})
