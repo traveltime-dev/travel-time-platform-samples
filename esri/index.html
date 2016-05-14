@@ -18,13 +18,47 @@
   <script src="https://js.arcgis.com/4.0/"></script>
 
   <style>
-    html,
-    body,
     #viewDiv {
       padding: 0;
       margin: 0;
       height: 100%;
       width: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    #controlsDiv {
+      width: 320px;
+      height: 100px;
+      position: absolute;
+      bottom: 32px;
+      left: 20px;
+
+      /*background-color: #fff;
+      -webkit-box-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);*/
+    }
+
+    .control-button {
+      width: 36px;
+      height: 36px;
+      padding: 8px;
+
+      text-align: center;
+
+
+      float:left;
+
+      margin-top: 26px;
+      margin-left: 6px;
+      margin-right: 6px;
+
+      font-size: 24px;
+    }
+
+    .control-button:hover {
+      background-color: #f2f2f2;
     }
   </style>
   <script>
@@ -35,5 +69,11 @@
 
 <body>
   <div id="viewDiv"></div>
+  <div id="controlsDiv">
+      <span id="reverse" class="esri-widget-button control-button esri-icon esri-icon-reverse"></span>
+      <span id="pause" class="esri-widget-button control-button esri-icon esri-icon-pause"></span>
+      <span id="forward" class="esri-widget-button control-button esri-icon esri-icon-forward"></span>
+      <span id="restart" class="esri-widget-button control-button esri-icon esri-icon-refresh"></span>
+  </div>
 </body>
 </html>

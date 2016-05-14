@@ -23,7 +23,6 @@ define(["esri/Map",
 			Popup,
 			api){
 
-
 		function distance(a, b){
 			var lat = (a.latitude - b.latitude);
 			var lon = (a.longitude - b.longitude);
@@ -43,6 +42,13 @@ define(["esri/Map",
 				map: self.map,
 				zoom: 12
 			});
+
+			self.restart = function() {
+				self.removeShapes("intersection");
+				self.removeShapes();
+				self.removePersons();
+				self.removeMeetups();
+			};
 
 			function asMinutes(seconds) {
 				return Math.round(seconds / 60);
@@ -261,7 +267,15 @@ define(["esri/Map",
 				}
 			}
 
-			self.meetupLocations = []
+			self.meetupLocations = [];
+			self.meetupGraphics = [];
+			self.removeMeetups = function(){
+				self.view.then(function(){
+					self.meetupGraphics.forEach(function(g){
+						self.view.graphics.remove(g);
+					});
+				})
+			}
 
 			self.drawMeetupLocation = function(caffee){			
 				var onTheMap = self.meetupLocations.find(function(c){
@@ -269,25 +283,27 @@ define(["esri/Map",
 				});
 
 				if(!onTheMap) {
+					self.meetupLocations.push(caffee);
+
 					var markerSymbol = new SimpleMarkerSymbol({
 						color: [50, 144, 128],
-						outline: { 
+						outline: {
 							color: [255, 255, 255],
 							width: 2
 						}
 					});
 
 					var point = new Point(caffee.location);
-				 	var graphic = new Graphic({
+					var graphic = new Graphic({
 						geometry: point,
 						symbol: markerSymbol
 					});
-
+	
 					self.view.then(function(){
 						self.view.graphics.add(graphic);
 					});
 
-					self.meetupLocations.push(caffee);
+					self.meetupGraphics.push(graphic);
 				}
 			}
 		}

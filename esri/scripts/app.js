@@ -6,6 +6,7 @@ define(["scripts/keys",
 	 	"esri/geometry/geometryEngine",
 	 	"dojo/promise/all",
 	 	"scripts/caffeList",
+	 	"jquery",
 	 	"dojo/domReady!"],
 	function(keys,
 			api,
@@ -14,7 +15,8 @@ define(["scripts/keys",
 			Point,
 			geometryEngine,
 			all,
-			caffeList
+			caffeList,
+			$
 			) {
 
 		if(keys.apiId == ""){
@@ -36,17 +38,31 @@ define(["scripts/keys",
 
 			map.drawPath(batmanPath);
 			map.drawPath(supermanPath);
-			var steps = 7;
+			var steps = 12;
 			var batmanStep = batmanPath.length / steps;
 			var supermanStep = supermanPath.length / steps;
-			var i = -1;	
-			var direction = 1;
-			
+			var i = 0;
+			var direction = 0;
+
+			$("#reverse").click(function(){
+				direction = -1;
+			});
+			$("#pause").click(function(){
+				direction = 0;
+			});
+			$("#forward").click(function(){
+				direction = 1;
+			});
+			var shouldRestart = false;
+			$("#restart").click(function(){
+				shouldRestart = true;
+			});
+
 			window.setInterval(function(){
 				i = i + direction;
-				if(i > steps) {
+				if(i > steps || i < 0) {
+					i = i - direction;
 					return;
-					//direction = - direction;
 				}
 				var nextBatmanPosition = batmanPath[Math.min(batmanPath.length - 1, Math.round(batmanStep * i))];
 				var nextSupermanPosition = supermanPath[Math.min(supermanPath.length - 1, Math.round(supermanStep * i))];
@@ -68,7 +84,7 @@ define(["scripts/keys",
 						var rings = shape.shell.map(api.swapCoords);
 						if(rings.length > 0)
 							return new Polygon({rings: rings});
-						else 
+						else
 							return null;
 					});
 
@@ -86,8 +102,15 @@ define(["scripts/keys",
 							map.drawMeetupLocation(f);
 						}
 					});
+
+					if(shouldRestart) {
+						i = 0;
+						direction = 0;
+						map.restart();
+						shouldRestart = false;
+					}
 				})
-			}, 7 * 1000 / steps);
+			}, 12 * 1000 / steps);
 		});
 
 	}
