@@ -280,12 +280,16 @@ define(["esri/Map",
 			}
 
 			self.bringMeetupsToFront = function(){
+				var newGraphics = [];
+
 				self.meetupGraphics.forEach(function(g){
 					var clone = g.clone();
                     self.view.graphics.add(clone);
 					self.view.graphics.remove(g);
-					self.meetupGraphics.push(clone);
+					newGraphics.push(clone);
 				});
+
+				self.meetupGraphics = newGraphics;
 			};
 
 			self.drawMeetupLocation = function(caffee){			
