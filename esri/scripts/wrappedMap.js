@@ -265,6 +265,8 @@ define(["esri/Map",
 				} else {
 					self.shapes[layer] = shapes;
 				}
+
+				self.bringMeetupsToFront();
 			}
 
 			self.meetupLocations = [];
@@ -276,6 +278,15 @@ define(["esri/Map",
 					});
 				})
 			}
+
+			self.bringMeetupsToFront = function(){
+				self.meetupGraphics.forEach(function(g){
+					var clone = g.clone();
+                    self.view.graphics.add(clone);
+					self.view.graphics.remove(g);
+					self.meetupGraphics.push(clone);
+				});
+			};
 
 			self.drawMeetupLocation = function(caffee){			
 				var onTheMap = self.meetupLocations.find(function(c){
@@ -298,7 +309,7 @@ define(["esri/Map",
 						geometry: point,
 						symbol: markerSymbol
 					});
-	
+
 					self.view.then(function(){
 						self.view.graphics.add(graphic);
 					});
