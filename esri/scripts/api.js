@@ -56,13 +56,13 @@ define(["dojo/request", "scripts/keys"], function(request, keys){
 							shape1: {
 								coords: first,
 								start_time: new Date(),
-								travel_time: 25*60,
+								travel_time: 20*60,
 								mode: "public_transport"
 							},
 							shape2: {
 								coords: second,
 								start_time: new Date(),
-								travel_time: 25*60,
+								travel_time: 20*60,
 								mode: "public_transport"
 							}
 						},

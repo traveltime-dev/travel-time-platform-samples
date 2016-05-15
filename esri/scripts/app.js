@@ -38,7 +38,7 @@ define(["scripts/keys",
 
 			map.drawPath(batmanPath);
 			map.drawPath(supermanPath);
-			var steps = 12;
+			var steps = 16;
 			var batmanStep = batmanPath.length / steps;
 			var supermanStep = supermanPath.length / steps;
 			var i = 0;
