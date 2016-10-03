@@ -1,7 +1,7 @@
 define(["dojo/request", "scripts/keys"], function(request, keys){
 	return {
 		getPath: function(from, to) {
-			return request.post("http://api.traveltimeapp.com/v3/routes", {
+			return request.post("https://api.traveltimeapp.com/v3/routes", {
 				data: JSON.stringify({
 					target: {
 						coords: from,
@@ -26,7 +26,7 @@ define(["dojo/request", "scripts/keys"], function(request, keys){
 			});
 		},
 		getRoutes: function(firstSource, secondSource, destination, time) {
-			return request.post("http://api.traveltimeapp.com/v3/routes", {
+			return request.post("https://api.traveltimeapp.com/v3/routes", {
 					data: JSON.stringify(
 						{
 							target: {
@@ -48,7 +48,7 @@ define(["dojo/request", "scripts/keys"], function(request, keys){
 				});
 		},
 		getShape: function(first, second) {
-			return request.post("http://api.traveltimeapp.com/v3/time_map", {
+			return request.post("https://api.traveltimeapp.com/v3/time_map", {
 					data: JSON.stringify({
 						format: "hash",
 						smooth: true,
@@ -96,7 +96,7 @@ define(["dojo/request", "scripts/keys"], function(request, keys){
 				return o;
 			}, {});
 			var startTime = new Date();
-			return request.post("http://api.traveltimeapp.com/v3/time_filter", {
+			return request.post("https://api.traveltimeapp.com/v3/time_filter", {
 					data: JSON.stringify({
 						points: pointMap,
 						sources: {

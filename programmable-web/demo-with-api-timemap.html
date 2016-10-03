@@ -1,9 +1,9 @@
 <!-- Can be viewed live at http://samples.traveltimeplatform.com/programmable-web/demo-with-api-timemap.html -->
 <html>
   <head>
-  <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@0.7.7/dist/leaflet.css" />
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-  <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet@0.7.7/dist/leaflet.js"></script>
   <style type="text/css">
     .map-marker {
       font-size: 2em;
@@ -22,7 +22,7 @@
       var origin = [51.504622, -0.089905]; // This is the Location of starting point which is London School of Commerce
       var radiusMeters = 3 * 1609.34; // miles * meters per mile.
 
-      var osmUrl="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"; // This the OSM public tile layer for the map url template.
+      var osmUrl="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"; // This the OSM public tile layer for the map url template.
       var osmTileLayer = L.tileLayer(osmUrl);
 
       function getMonday8Am() {
@@ -66,7 +66,7 @@
           }
         };
 
-        xhttp.open("POST", "http://api.traveltimeapp.com/v3/" + endpoint, true);
+        xhttp.open("POST", "https://api.traveltimeapp.com/v3/" + endpoint, true);
         xhttp.send(JSON.stringify(request));
       }
 
