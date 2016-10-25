@@ -1,0 +1,305 @@
+<html>
+<head>
+   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
+   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+   <script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
+   <style type="text/css">
+    .map-marker {
+      font-size: 2em;
+      top: -0.75em;
+      left: -0.20em;
+      position: absolute;
+    }
+    .red { color: red; }
+    .green { color: green; }
+    .blue { color: blue; }
+    .container {
+     height: 100%;
+     width: calc(100% - 340px);
+     float: right;
+    }
+
+    .timed-element {
+      border-style: solid;
+      border-width: 1px;
+    }
+
+   .sidebar {
+       height: 100%;
+       float: left;
+       position: absolute;
+       width: 340px;
+   }
+
+   .form-margin {
+      margin-top: 3px;
+      margin-left: 3px;
+   }
+
+   #listContainer {
+       height: calc(100% - 37px);
+       overflow-y: scroll;
+       margin-bottom: 0px;
+   }
+    
+  </style>
+</head>
+<body onload="filter()">
+   <div id="sidebar" class="sidebar">
+      <div class="form-inline form-margin">
+         <div class="form-group">
+            <select onchange="filter()" id="travelTime" class="form-control">
+               <option value="30">30 minutes</option>
+               <option value="60">1 hour</option>
+            </select>
+         </div>
+         <div class="form-group">
+            <select onchange="filter()" id="transportMode" class="form-control">
+               <option value="public_transport">Public Transport</option>
+               <option value="driving">Car</option>
+            </select>
+         </div>    
+         <!-- <div class="form-group">
+            <a onclick="filter()" class="btn btn-primary btn-block">Filter</a>
+         </div> -->
+      </div>
+      <ul id="listContainer" class="list-group"></ul>
+   </div>
+
+   <div id="results">
+      <div id="map" class="container"></div>
+   </div>
+
+   <script type="text/javascript">
+      // Coordinates of the Big Ben tower in London. This will be our starting point.
+      var origin = [51.50072919999999, -0.12462540000001354];  
+      // This the OSM public tile layer for the map url template.
+      var osmUrl="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"; 
+      var osmTileLayer = L.tileLayer(osmUrl);
+      // We will draw markers on this layer for convenience since it is easy to clear.
+      var markerLayer = L.layerGroup(); 
+      // Our initialized Leaflet map.  
+      var leafletMap = L.map('map').addLayer(osmTileLayer).addLayer(markerLayer).setView(origin, 10);  
+        
+      // Our Points of Interest. These are the coordinates that we will be filtering and sorting by time.
+      var poi = {
+         "0": [51.616161269607204, -0.17662346363067627],
+         "1": [51.49244625930521, -0.26195526123046875],
+         "2": [51.37965553319897, -0.12654045850662113],
+         "3": [51.460467, -0.305252],
+         "4": [51.522629700334875, -0.1574993133544922],
+         "5": [51.5758960320088, 0.18044829368591309],
+         "6": [51.46222767378054, -0.13713817739667528],
+         "7": [51.35837822720711, -0.14941893682053212],
+         "8": [51.51414429771045, -0.09331941604614258],
+         "9": [51.651279690402774, -0.08340990452845387],
+         "10": [51.53368413448334, -0.1708298921585083],
+         "11": [51.48016818237156, -0.1942825713458104],
+         "12": [51.655165411953185, -0.20164461701824957],
+         "13": [51.59119706674016, -0.14244952316060924],
+         "14": [51.52797922665271, -0.13352528076421896],
+         "15": [51.431438144613224, -0.1293293542086337],
+         "16": [51.41377739245928, -0.17718887956063264],
+         "17": [51.559337167974114, 0.07457972707055704],
+         "18": [51.54643512880015, -0.4788172245025635],
+         "19": [51.512245406793774, -0.08245635636173995],
+         "20": [51.410910308187816, -0.29050615527435497],
+         "21": [51.57862971883085, 0.18387079238891602],
+         "22": [51.52046530972012, -0.1569607821816459],
+         "23": [51.29567420055744, -0.3284724629837203],
+         "24": [51.61274893666576, -0.2756691450088268],
+         "25": [51.494480263085364, -0.14590680599212646],
+         "26": [51.620578, 0.30265],
+         "27": [51.68478551948253, -0.31634330007889566],
+         "28": [51.444232736311, 0.21867543760298164],
+         "29": [51.426061, -0.337172],
+         "30": [51.616161269607204, -0.17662346363067627],
+         "31": [51.49244625930521, -0.26195526123046875],
+         "32": [51.37965553319897, -0.12654045850662113],
+         "33": [51.460467, -0.305252],
+         "34": [51.522629700334875, -0.1574993133544922],
+         "35": [51.5758960320088, 0.18044829368591309],
+         "36": [51.46222767378054, -0.13713817739667528],
+         "37": [51.35837822720711, -0.14941893682053212],
+         "38": [51.51414429771045, -0.09331941604614258],
+         "39": [51.651279690402774, -0.08340990452845387],
+         "40": [51.53368413448334, -0.1708298921585083],
+         "41": [51.48016818237156, -0.1942825713458104],
+         "42": [51.655165411953185, -0.20164461701824957],
+         "43": [51.59119706674016, -0.14244952316060924],
+         "44": [51.52797922665271, -0.13352528076421896],
+         "45": [51.431438144613224, -0.1293293542086337],
+         "46": [51.41377739245928, -0.17718887956063264],
+         "47": [51.559337167974114, 0.07457972707055704],
+         "48": [51.54643512880015, -0.4788172245025635],
+         "49": [51.512245406793774, -0.08245635636173995],
+         "50": [51.410910308187816, -0.29050615527435497],
+         "51": [51.57862971883085, 0.18387079238891602],
+         "52": [51.52046530972012, -0.1569607821816459],
+         "53": [51.29567420055744, -0.3284724629837203],
+         "54": [51.61274893666576, -0.2756691450088268],
+         "55": [51.494480263085364, -0.14590680599212646],
+         "56": [51.620578, 0.30265],
+         "57": [51.68478551948253, -0.31634330007889566],
+         "58": [51.444232736311, 0.21867543760298164],
+         "59": [51.426061, -0.337172]
+      }
+        
+        // this is the final function we call when the filter button is clicked.
+      function filter() {
+         // Get the parameters used to create the request from the HTML elements.
+         var travelTime = parseInt(document.getElementById("travelTime").value) * 60;
+         var transportMode = document.getElementById("transportMode").value;
+            
+         // Create the request JSON.
+         var request = createRequest(travelTime, transportMode);
+            
+         // Send the request to TravelTime API.
+         postRequest(request, "time_filter", timeFilterResponseHandler);
+      }
+      
+      // The function that handles the received response.
+      function timeFilterResponseHandler(responseText) {
+         // First we split reachable and ureachable points of interest.
+         var filteredPoi = filterByResponse(poi, responseText);       
+          
+         // Then clear the marker layer and draw the origin marker.  
+         markerLayer.clearLayers();
+         drawMarker("blue")(origin);
+          
+         // Draw the reachable markers
+         var drawReachable = drawMarker("green");
+         filteredPoi.reachable.forEach(function (coords) {
+            drawReachable(coords);
+         });
+          
+         // Draw the unreachable markers.
+         var drawUnreachable = drawMarker("red");
+         filteredPoi.unreachable.forEach(function (coords) {
+            drawUnreachable(coords);
+         });
+          
+         // Finally we create the table with timed points of interest.
+         var timedPoi = getTimes(responseText);
+         displayTimes(timedPoi);  
+      }
+        
+      // A Simple post request helper, could use jQuery instead.
+      function postRequest(request, endpoint, callback) {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+          if (xhttp.readyState == 4 && xhttp.status == 200) {
+            callback(xhttp.responseText);
+          }
+        };
+        xhttp.open("POST", "https://api.traveltimeapp.com/v3/" + endpoint, true);
+        xhttp.send(request);
+      }
+        
+      // Creates our request JSON with variable travel time and transport mode.
+      function createRequest(travelTime, mode) {
+         return JSON.stringify({
+            app_id: "37038da8",
+            app_key: "bea255b312f538a368c8efa5abf10748",
+            points: poi,
+            sources: {
+               source1: {
+                  coords: origin,
+                  start_time: getMonday8Am().toISOString(),
+                  travel_time: travelTime,
+                  mode: mode,
+                  properties: ["time"]
+               }
+            },
+            destinations: {},
+            remove_wait_time: false
+         });
+      }
+      
+      // This function splits our array of Points of Interest into reachable and unreachable point lists.
+      function filterByResponse(poi, responseText) {
+        var responseJson = JSON.parse(responseText);
+        // As a response we get dictionary with reachable points.
+        // In request we have set it up as id: coords, so keys of the dictionary are indices of the reachable points.
+        var reachablePointsKeys = Object.keys(responseJson.sources.source1.points);
+        
+        var unreachablePoiKeys = Object.keys(poi).filter(function(elem) {
+            return reachablePointsKeys.indexOf(elem) == -1;
+         });
+
+        var reachablePoints = reachablePointsKeys.map(function(i){
+          return poi[i];
+        });
+        var unreachablePoints = unreachablePoiKeys.map(function (i) {
+            return poi[i];
+        });
+           
+        return {reachable: reachablePoints, unreachable: unreachablePoints };
+      }
+      
+      // This function parses the response and sorts the result by time to be displayed in the results table. 
+      function getTimes(responseText) {
+         var points = JSON.parse(responseText).sources.source1.points;
+          
+         // Transforms dictionary to an array of objects 
+         var keys = Object.keys(points);
+         return keys.map(function (key) {
+            return { name: key, time: points[key].time };
+              
+         // Sorts by time
+         }).sort(function (a, b) { 
+            return a.time - b.time;
+         });
+      }
+      
+      // This function displays the reachable results sorted by time.
+      function displayTimes(points) {
+         // Gets the container Element.
+         var container = document.getElementById("listContainer");
+         // Creates the HTML of the list.
+         var list = points.map(function (point) {
+            return timedElementTemplate(point.name, secondsToHHMMSS(point.time));
+         }).join("");
+         // Sets the HTML content of the results container. 
+         container.innerHTML = list;
+      }
+      
+      // HTML template for displaying the result with time.
+      function timedElementTemplate(name, time) {
+         return `<li class="list-group-item">Name: ${name}<br>Time: ${time}</li>`;
+      }
+      
+     // A helper function do display time in a conventional format.
+     function secondsToHHMMSS(totalSeconds) {
+        var hours   = Math.floor(totalSeconds / 3600);
+        var minutes = Math.floor((totalSeconds - (hours * 3600)) / 60);
+        var seconds = totalSeconds - (hours * 3600) - (minutes * 60);
+        seconds = Math.round(seconds * 100) / 100
+        var result = (hours < 10 ? "0" + hours : hours);
+            result += ":" + (minutes < 10 ? "0" + minutes : minutes);
+            result += ":" + (seconds  < 10 ? "0" + seconds : seconds);
+        return result;
+      }
+      
+      // A helper to draw a marker on the marker layer with a desired color. 
+      function drawMarker(color) {
+        return function (i) {
+          var icon = L.divIcon({
+            className: "glyphicon glyphicon-map-marker map-marker " + color
+          });
+          L.marker(i, {icon: icon}).addTo(markerLayer);
+        }
+      }
+      
+      // A helper function to get the next Monday so this demo works in the future.
+      function getMonday8Am() {
+        d = new Date();
+        d.setUTCHours(8, 0, 0, 0);
+        var day = d.getDay(),
+          diff = d.getDate() - day + (day == 0 ? -6:1); // adjust when day is Sunday
+        return new Date(d.setDate(diff));
+      }
+      
+   </script>
+</body>
+</html>
