@@ -1,0 +1,155 @@
+<!-- Can be viewed live at http://samples.traveltimeplatform.com/programmable-web/demo-with-api-timemap.html -->
+<html>
+  <head>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@0.7.7/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <script src="https://unpkg.com/leaflet@0.7.7/dist/leaflet.js"></script>
+    <style type="text/css">
+      .map-marker {
+        font-size: 2em;
+        top: -0.75em;
+        left: -0.20em;
+        position: absolute;
+      }
+      .red { color: red; }
+      .blue { color: blue; }
+      .yellow { color: yellow; }
+    </style>
+    <script  src="https://code.jquery.com/jquery-3.1.1.min.js"  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="  crossorigin="anonymous"></script>
+
+  </head>
+  <body>
+    <div id="map" style="height: 100%;"></div>
+    <script type="text/javascript" >
+      var origin = [51.504622, -0.089905]; // This is the Location of starting point which is London School of Commerce
+      var radiusMeters = 3 * 1609.34; // miles * meters per mile.
+      var osmUrl="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"; // This the OSM public tile layer for the map url template.
+      var osmTileLayer = L.tileLayer(osmUrl);
+      function getMonday8Am() {
+        d = new Date();
+        d.setUTCHours(8, 0, 0, 0);
+        var day = d.getDay(),
+          diff = d.getDate() - day + (day == 0 ? -6:1); // adjust when day is sunday
+        return new Date(d.setDate(diff));
+      }
+      var map = L.map("map").addLayer(osmTileLayer).setView(origin, 12);
+    
+
+    $.ajax({
+      type: 'POST',
+      url:"https://api.traveltimeapp.com/v4/time-map", 
+      headers: {"X-Application-Id": "37038da8", "X-Api-Key": "bea255b312f538a368c8efa5abf10748"},
+      contentType: "application/json",
+      dataType: "json",
+      data: JSON.stringify({
+        "departure_searches": [
+          {
+            "id": "public transport from Trafalgar Square",
+            "coords": {
+              "lat": 51.507609,
+              "lng": -0.128315
+            },
+            "transportation": {
+              "type": "public_transport"
+            },
+            "departure_time": "2016-12-29T08:00:00Z",
+            "travel_time": 25*60,
+            "range": {
+              "enabled": true,
+              "width": 3600
+            }
+          }
+        ]
+      }),
+      success: function(result) {
+        result.results[0].shapes.forEach(function(shape) {
+          var holes = shape.holes;
+          holes.unshift(shape.shell);
+          L.polygon(holes).addTo(map);
+        });
+      }
+    });
+
+    var i = 0;  
+
+    var locations = [
+        {
+          "id": "Trafalgar Square",
+          "coords": {
+              "lat": 51.507609,
+              "lng": -0.128315
+            }
+        }
+    ];
+
+    for(var x = 0; x < 30; x++) {
+      for(var y = 0; y < 30; y++) {
+        locations.push(
+        {
+          "id": "a" + i++,
+          "coords": {
+            "lat": 51.507609 + 0.005 * (x - 15),
+            "lng": -0.128315 + 0.005 * (y - 15)
+          }
+        })
+      }
+    }
+
+    var ids = locations.map(function(l){return l.id;})
+    console.log(ids)
+
+    $.ajax({
+      type: 'POST',
+      url:"https://api.traveltimeapp.com/v4/time-filter", 
+      headers: {"X-Application-Id": "37038da8", "X-Api-Key": "bea255b312f538a368c8efa5abf10748"},
+      contentType: "application/json",
+      dataType: "json",
+      data: JSON.stringify({
+        "locations": locations,
+        "departure_searches": [
+          {
+            "id": "Trafalgar Square Search",
+            departure_location_id: "Trafalgar Square",
+            arrival_location_ids: ids,
+            "transportation": {
+              "type": "public_transport"
+            },
+            "departure_time": "2016-12-29T08:00:00Z",
+            "travel_time": 25*60,
+            "range": {
+              "enabled": true,
+              "width": 3600,
+              "max_results": 1
+            },
+            properties: [
+              "travel_time"
+            ]
+          }
+        ]
+      }),
+      success: function(result) {
+        result.results[0].locations.forEach(function(location){
+          console.log("reachable: " + location.id);
+
+          var icon = L.divIcon({
+            className: "glyphicon glyphicon-map-marker map-marker green"
+          });
+          var current = locations.find(function(el){return el.id === location.id})
+          L.marker(current.coords, {icon: icon}).addTo(map);
+        });
+
+
+        result.results[0].unreachable.forEach(function(location){
+          console.log("unreachable: " + location);
+          var icon = L.divIcon({
+            className: "glyphicon glyphicon-map-marker map-marker red"
+          });
+          var current = locations.find(function(el){return el.id === location})
+          L.marker(current.coords, {icon: icon}).addTo(map);
+        });
+      }
+    });
+
+    </script>
+  </body>
+</html>
